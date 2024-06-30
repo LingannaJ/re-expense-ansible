@@ -13,8 +13,14 @@
       state: started
       enabled: yes
 
-  # - name: removing default cantant website
-  #   ansible.builtin.file:
-  #     path: /usr/share/nginx/html/
-  #     state: directory
+  - name: removing default cantant website
+    ansible.builtin.file:
+      path: /usr/share/nginx/html/
+      state: absent
+
+# - name: create contant directory
+#     ansible.builtin.file:
+#       path: /usr/share/nginx/html/
+#       state: directory
+
 
