@@ -28,7 +28,7 @@
   - name: creating app dirctory
     ansible.builtin.file:
       path: /app
-      state: dirctory
+      state: directory
 
   - name: downloading the zip code
     ansible.builtin.get_url:
