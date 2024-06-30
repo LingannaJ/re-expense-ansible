@@ -12,7 +12,8 @@
       name: mysqld
       state: started
       enabled: yes
-
+  - name: setup root password
+    asible.builtin.command: mysql_secure_installation --set-root-pass ExpenseApp@1
 
 #  - name: install python mysql dependencies
 #     ansible.builtin.pip:
@@ -36,5 +37,4 @@
   #     msg: "Output: {{mysql_connection_output}} "
 
 
-  - name: setup root password
-    asible.builtin.command: mysql_secure_installation --set-root-pass ExpenseApp@1
+  
