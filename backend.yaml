@@ -1,0 +1,83 @@
+- name: configur backend server
+  hosts: backend
+  become: yes
+  vars:
+    login_host: db.shivdev.online
+    login_password: ExpenseApp@1
+    login_user: root
+
+  tasks:
+  - name: disabling nodeJS
+    ansible.builtin.command: dnf module disable nodejs -y
+
+  - name: enabled nodjs 20
+    ansible.builtin.command: dnf module enable nodejs:20 -y
+
+  - name: nodjs install
+    ansible.builtin.dnf:
+      name: "{{ item }}"
+      state: latest
+    loop:
+    - nodejs
+    - mysql
+
+  - name: user creating 
+    ansible.builtin.user:
+      name: expense
+
+  - name: creating app dirctory
+    ansible.builtin.file:
+      path: /app
+      state: dirctory
+
+  - name: downloading the zip code
+    ansible.builtin.get_url:
+      url: https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
+      dest: /tmp/backend.zip
+
+  - name: unzipping the code
+    ansible.builtin.unarchive:
+      src: /tmp/backend.zip
+      dest: /app
+      remote_src: yes
+
+  - name: install npm dependencies
+    ansible.builtin.command:
+      name: npm install
+      args:
+        chdir: /app
+
+  - name: copy the backend service
+    ansible.builtin.copy:
+      src: backend.service
+      dest: /etc/systemd/system/backend.service
+
+  - name: install python mysql dependencies
+    ansible.builtin.pip: 
+      name:
+      - PyMySQL # to connect MySQL DB from Ansible we need to these #dependencies to be installed
+      - cryptography
+      executable: pip3.9 # pip3.11 if python version is 3.11
+
+  - name: import data into mysql
+      community.mysql.mysql_db:
+        login_user: "{{ login_user }}"
+        login_password: "{{ login_password }}"
+        login_host: "{{ login_host }}"
+        target: /app/schema/backend.sql
+        state: import
+        name: all
+
+  - name: deamon reload
+    ansible.builtin.systemd_service:
+      daemon_reload: true
+
+  - name: start and enable backend service
+    ansibile.builtin.service:
+      name: backend
+      state: started
+      enabled: yes
+
+  
+
+
